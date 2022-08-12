@@ -26,6 +26,7 @@ internal class Program {
                 break;
             default:
                 Web.FetchPython();
+                PythonVersion = Processes.GetPyVersion();
                 break;
         }
 
@@ -57,6 +58,7 @@ internal class Program {
         Console.WriteLine("Will attempt to clone/update the branch from " + RepositoryChoice.ToString() + "...");
         RepositoryChoice.PullRepo();
 
+        Console.WriteLine("Checking/Resolving dependencies for the gui...");
         setupDoorsDependencies(RepositoryChoice.LocalPath(), DoorsDependenciesInstall);
 
         Console.WriteLine("Launching the GUI for your selected branch. If nothing happens, there may be an error written below you can report!");
@@ -71,8 +73,9 @@ internal class Program {
 
         static void setupDoorsDependencies(string directory, string dependencies) {
             Process python = Processes.StartPythonWithOptions(dependencies, directory);
-            Console.WriteLine(python.StandardOutput.ReadToEnd().Trim());
-            Console.WriteLine(python.StandardError.ReadToEnd().Trim());
+            //Console.WriteLine(python.StandardOutput.ReadToEnd().Trim());
+            //Console.WriteLine(python.StandardError.ReadToEnd().Trim());
+            python.WaitForExit();
         }
     }
 }

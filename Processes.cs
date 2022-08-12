@@ -14,8 +14,12 @@ namespace DoorDownloader {
             processStartInfo.RedirectStandardOutput = true;
             processStartInfo.RedirectStandardError = true;
             processStartInfo.CreateNoWindow = true;
-
-            Process process = Process.Start(processStartInfo);
+            Process? process;
+            try {
+                process = Process.Start(processStartInfo);
+            } catch (Exception) {
+                process = null;
+            }
             return process;
         }
 
@@ -25,7 +29,7 @@ namespace DoorDownloader {
                 pythonPath = "python3.exe";
 
             Process python = StartProcessWithOptions(pythonPath, arguments, workingDirectory);
-            if (python == null) {
+            if (python == null || python.StandardError.ReadToEnd().Contains("not found")) {
                 pythonPath = AppContext.BaseDirectory + "python/" + "python";
                 if (OperatingSystem.IsWindows())
                     pythonPath = AppContext.BaseDirectory + "python\\" + "python.exe";
@@ -38,7 +42,13 @@ namespace DoorDownloader {
         }
 
         public static string GetPyVersion() {
-            Process process = StartPythonWithOptions(" -c \"import sys; print(str(sys.version_info[0])+'.'+str(sys.version_info[1]))\"");
+            Process? process;
+            try {
+                process = StartPythonWithOptions(" -c \"import sys; print(str(sys.version_info[0])+'.'+str(sys.version_info[1]))\"");
+            } catch (Exception) {
+                return "";
+            }
+            
             return process.StandardOutput.ReadToEnd().Trim();
         }
     }

@@ -18,9 +18,9 @@ namespace DoorDownloader {
             string installerArgs;
             if (System.OperatingSystem.IsWindows()) {
                 if (Environment.Is64BitOperatingSystem)
-                    pythonToDL = "https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86_64.exe";
+                    pythonToDL = "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.9.2-Windows-x86_64.exe";
                 else
-                    pythonToDL = "https://repo.anaconda.com/miniconda/Miniconda3-latest-Windows-x86.exe";
+                    pythonToDL = "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.9.2-Windows-x86.exe";
                 installer = "instPython.exe";
                 installerArgs = "/S /RegisterPython=0 /D=" + AppContext.BaseDirectory + "python";
             } else if (System.OperatingSystem.IsMacOS()) {
@@ -59,6 +59,10 @@ namespace DoorDownloader {
             Process process = Processes.StartProcessWithOptions(AppContext.BaseDirectory + installer, installerArgs);
             Console.WriteLine("Installing local python instance, if things freeze here longer than 2 minutes, something has gone wrong...");
             process.WaitForExit();
+            File.Copy(AppContext.BaseDirectory + "python/Library/bin/libcrypto-1_1-x64.dll", AppContext.BaseDirectory + "python/DLLs/libcrypto-1_1-x64.dll");
+            File.Copy(AppContext.BaseDirectory + "python/Library/bin/libcrypto-1_1-x64.pdb", AppContext.BaseDirectory + "python/DLLs/libcrypto-1_1-x64.pdb");
+            File.Copy(AppContext.BaseDirectory + "python/Library/bin/libssl-1_1-x64.dll", AppContext.BaseDirectory + "python/DLLs/libssl-1_1-x64.dll");
+            File.Copy(AppContext.BaseDirectory + "python/Library/bin/libssl-1_1-x64.pdb", AppContext.BaseDirectory + "python/DLLs/libssl-1_1-x64.pdb");
         }
     }
 }
