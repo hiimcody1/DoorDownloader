@@ -50,7 +50,7 @@ internal class Program {
         rootCommand.Add(forceUpdate);
         rootCommand.Add(forcedRepository);
         rootCommand.Add(forcedBranch);
-        //rootCommand.Add(forcedPython);
+        rootCommand.Add(forcedPython);
         rootCommand.Add(outputPath);
         rootCommand.Add(romPath);
         rootCommand.Add(createShortcut);
