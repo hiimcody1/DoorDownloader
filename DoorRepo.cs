@@ -1,53 +1,80 @@
 ﻿using LibGit2Sharp;
+using Newtonsoft.Json;
 
 namespace DoorDownloader {
     internal class DoorRepo {
-        protected string repoOwner;
-        protected string baseURL;
-        protected string friendlyName;
-        protected string branchName;
-        protected string basePath;
+        public string Owner { get; set; }
+        public string BaseUrl { get; set; }
+        public List<DoorRepoBranch> Branches { get; set; }
 
-        public DoorRepo(string repoOwner, string baseURL, string friendlyName, string branchName) {
-            this.repoOwner = repoOwner;
-            this.baseURL = baseURL;
-            this.friendlyName = friendlyName;
-            this.branchName = branchName;
-            this.basePath = AppContext.BaseDirectory + this.branchName;
+        public static bool forceUpdates = false;
+
+        public DoorRepo(string owner, string baseUrl) {
+            Owner = owner;
+            BaseUrl = baseUrl;
+            Branches = new List<DoorRepoBranch>();
         }
 
-        public string URL() {
-            return this.baseURL;
-        }
-
-        public string LocalPath() {
-            return this.basePath;
-        }
-
-        public string FriendlyName() {
-            return this.friendlyName;
+        [JsonConstructor]
+        public DoorRepo(string owner, string baseUrl, List<DoorRepoBranch> branches) {
+            Owner = owner;
+            BaseUrl = baseUrl;
+            Branches = branches;
         }
 
         public override string ToString() {
-            return this.repoOwner + " - " + this.friendlyName;
+            return this.Owner;
+        }
+    }
+
+    internal class DoorRepoBranch {
+        public string BaseRepoUrl = "";
+        public string BaseRepoOwner = "";
+        public string BranchName { get; set; }
+        public string FriendlyName { get; set; }
+        public string BasePath;
+
+        public bool ManualUpdateOnly = false;
+        [JsonConstructor]
+        public DoorRepoBranch(string branchName, string friendlyName) {
+            BranchName = branchName;
+            FriendlyName = friendlyName;
+            BasePath = AppContext.BaseDirectory + branchName;
+        }
+        public DoorRepoBranch(string branchName, string friendlyName, bool manualUpdateOnly) {
+            BranchName = branchName;
+            FriendlyName = friendlyName;
+            BasePath = AppContext.BaseDirectory + branchName;
+            ManualUpdateOnly = true;
+        }
+        public override string ToString() {
+            return this.BaseRepoUrl + this.BranchName;
         }
 
-        public void PullRepo() {
-            Directory.CreateDirectory(this.basePath);
+        public string ToFriendlyString() {
+            return this.BaseRepoOwner + " - " + this.FriendlyName;
+        }
+
+        public void Pull() {
+            Directory.CreateDirectory(this.BasePath);
 
             CloneOptions co = new CloneOptions();
-            co.BranchName = this.branchName;
+            co.BranchName = this.BranchName;
 
-            Repository DoorRepo;
+            Repository doorRepo;
 
             try {
-                DoorRepo = new Repository(this.basePath);
+                doorRepo = new Repository(this.BasePath);
+                if (this.ManualUpdateOnly && !DoorRepo.forceUpdates) {
+                    Console.WriteLine("Skipping update for branch (marked as requiring manual update)");
+                    return;
+                }
             } catch (RepositoryNotFoundException) {
-                Repository.Clone(this.baseURL, this.basePath, co);
-                DoorRepo = new Repository(this.basePath);
+                Repository.Clone(this.BaseRepoUrl, this.BasePath, co);
+                doorRepo = new Repository(this.BasePath);
             }
 
-            Commands.Pull(DoorRepo, new Signature("DoorsDownloader", "<>", new DateTimeOffset()), new PullOptions());
+            Commands.Pull(doorRepo, new Signature("DoorsDownloader", "<>", new DateTimeOffset()), new PullOptions());
             //TODO create way to preserve flags in settings that don't exist for other branches
             /*
             try {
@@ -57,18 +84,6 @@ namespace DoorDownloader {
                 //Silently fail
             }
             */
-        }
-
-        public static List<DoorRepo> GetAll() {
-            return new List<DoorRepo> {
-                new DoorRepo("Aerinon", "https://github.com/aerinon/ALttPDoorRandomizer/", "Stable", "DoorDev"),
-                new DoorRepo("Aerinon", "https://github.com/aerinon/ALttPDoorRandomizer/", "Unstable", "DoorDevUnstable"),
-                new DoorRepo("Aerinon", "https://github.com/aerinon/ALttPDoorRandomizer/", "Volatile", "DoorDevVolatile"),
-                new DoorRepo("Aerinon", "https://github.com/aerinon/ALttPDoorRandomizer/", "Customizer", "Customizer"),
-
-                new DoorRepo("Codemann8", "https://github.com/codemann8/ALttPDoorRandomizer/", "OverworldShuffle", "OverworldShuffle"),
-                new DoorRepo("Codemann8", "https://github.com/codemann8/ALttPDoorRandomizer/", "OverworldShuffleDev", "OverworldShuffleDev")
-            };
         }
     }
 }

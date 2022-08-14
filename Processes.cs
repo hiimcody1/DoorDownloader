@@ -2,6 +2,8 @@
 
 namespace DoorDownloader {
     internal class Processes {
+        public static string pythonOverridePath = "";
+
         public static Process StartProcessWithOptions(string processPath, string? arguments = null, string? workingDirectory = null) {
             ProcessStartInfo processStartInfo = new ProcessStartInfo();
             processStartInfo.FileName = processPath;
@@ -27,6 +29,12 @@ namespace DoorDownloader {
             string pythonPath = "python3";
             if (OperatingSystem.IsWindows())
                 pythonPath = "python3.exe";
+
+            if (Processes.pythonOverridePath != null && Processes.pythonOverridePath.Length > 0) {
+                if (Program.debug)
+                    Console.WriteLine("Using custom python: '" + Processes.pythonOverridePath + "'");
+                pythonPath = Processes.pythonOverridePath;
+            }
 
             Process python = StartProcessWithOptions(pythonPath, arguments, workingDirectory);
             if (python == null || python.StandardError.ReadToEnd().Contains("not found")) {

@@ -1,0 +1,39 @@
+[
+  {
+    "Owner": "Aerinon",
+    "BaseUrl": "https://github.com/aerinon/ALttPDoorRandomizer/",
+    "Branches": [
+      {
+        "BranchName": "DoorDev",
+        "FriendlyName": "Stable"
+      },
+      {
+        "BranchName": "DoorDevUnstable",
+        "FriendlyName": "Unstable"
+      },
+      {
+        "BranchName": "DoorDevVolatile",
+        "FriendlyName": "Volatile"
+      },
+      {
+        "BranchName": "Customizer",
+        "FriendlyName": "Customizer"
+      }
+    ]
+  },
+  {
+    "Owner": "Codemann8",
+    "BaseUrl": "https://github.com/codemann8/ALttPDoorRandomizer/",
+    "Branches": [
+      {
+        "BranchName": "OverworldShuffle",
+        "FriendlyName": "OverworldShuffle"
+      },
+      {
+        "BranchName": "OverworldShuffleDev",
+        "FriendlyName": "OverworldShuffleDev",
+        "ManualUpdateOnly": true
+      }
+    ]
+  }
+]

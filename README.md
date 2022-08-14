@@ -16,6 +16,8 @@ This project utilizes the following projects, which I recommend you check out:
 - [Codemann8's fork of the Door Randomizer](https://github.com/codemann8/ALttPDoorRandomizer)
 - [LibGit2Sharp](https://github.com/libgit2/libgit2sharp)
 - [Miniconda](https://github.com/conda/conda)
+- [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json)
+- [command-line-api](https://github.com/dotnet/command-line-api)
 
 ## Setup
 ### Prerequisites

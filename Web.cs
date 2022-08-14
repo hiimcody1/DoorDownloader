@@ -1,12 +1,29 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DoorDownloader {
     internal class Web {
+
+        public static string CheckForUpdates() {
+            var httpClient = new HttpClient();
+            var productInfo = new ProductInfoHeaderValue("DoorRandomizer-Downloader", Program.version);
+            httpClient.DefaultRequestHeaders.UserAgent.Add(productInfo);
+            var latestReleaseAsync = httpClient.GetStringAsync("https://api.github.com/repos/hiimcody1/DoorDownloader/releases/latest");
+            latestReleaseAsync.Wait();
+            JObject latestReleaseJson = JObject.Parse(latestReleaseAsync.Result);
+            string latestRelease = latestReleaseJson.GetValue("tag_name").ToString();
+            if (Program.debug) {
+                Console.WriteLine("Latest Release: " + latestRelease);
+                Console.WriteLine("  This Release: " + Program.version);
+            }
+            return latestRelease;
+        }
         public static void FetchBrew() {
 
         }
