@@ -76,10 +76,13 @@ namespace DoorDownloader {
             Process process = Processes.StartProcessWithOptions(AppContext.BaseDirectory + installer, installerArgs);
             Console.WriteLine("Installing local python instance, if things freeze here longer than 2 minutes, something has gone wrong...");
             process.WaitForExit();
-            File.Copy(AppContext.BaseDirectory + "python/Library/bin/libcrypto-1_1-x64.dll", AppContext.BaseDirectory + "python/DLLs/libcrypto-1_1-x64.dll");
-            File.Copy(AppContext.BaseDirectory + "python/Library/bin/libcrypto-1_1-x64.pdb", AppContext.BaseDirectory + "python/DLLs/libcrypto-1_1-x64.pdb");
-            File.Copy(AppContext.BaseDirectory + "python/Library/bin/libssl-1_1-x64.dll", AppContext.BaseDirectory + "python/DLLs/libssl-1_1-x64.dll");
-            File.Copy(AppContext.BaseDirectory + "python/Library/bin/libssl-1_1-x64.pdb", AppContext.BaseDirectory + "python/DLLs/libssl-1_1-x64.pdb");
+            if (!File.Exists(AppContext.BaseDirectory + "python/DLLs/libcrypto-1_1-x64.dll")) {
+                //They need to be copied
+                File.Copy(AppContext.BaseDirectory + "python/Library/bin/libcrypto-1_1-x64.dll", AppContext.BaseDirectory + "python/DLLs/libcrypto-1_1-x64.dll");
+                File.Copy(AppContext.BaseDirectory + "python/Library/bin/libcrypto-1_1-x64.pdb", AppContext.BaseDirectory + "python/DLLs/libcrypto-1_1-x64.pdb");
+                File.Copy(AppContext.BaseDirectory + "python/Library/bin/libssl-1_1-x64.dll", AppContext.BaseDirectory + "python/DLLs/libssl-1_1-x64.dll");
+                File.Copy(AppContext.BaseDirectory + "python/Library/bin/libssl-1_1-x64.pdb", AppContext.BaseDirectory + "python/DLLs/libssl-1_1-x64.pdb");
+            }
         }
     }
 }
