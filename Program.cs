@@ -177,7 +177,7 @@ internal class Program {
             }
 
             void setupDoorsDependencies(string directory) {
-                Process python = Processes.StartPythonWithOptions("-m pip install --user -r "+directory+"/resources/app/meta/manifests/pip_requirements.txt", directory);
+                Process python = Processes.StartPythonWithOptions("-m pip install --disable-pip-version-check --user -r " + directory+"/resources/app/meta/manifests/pip_requirements.txt", directory);
                 if (Program.debug) {
                     Console.WriteLine(python.StandardOutput.ReadToEnd().Trim());
                     Console.WriteLine(python.StandardError.ReadToEnd().Trim());

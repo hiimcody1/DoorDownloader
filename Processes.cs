@@ -19,7 +19,9 @@ namespace DoorDownloader {
             Process? process;
             try {
                 process = Process.Start(processStartInfo);
-            } catch (Exception) {
+            } catch (Exception ex) {
+                if(Program.debug)
+                    Console.WriteLine(ex.ToString());
                 process = null;
             }
             return process;
@@ -48,10 +50,14 @@ namespace DoorDownloader {
                     finalPath += ".exe";
 
                 python = StartProcessWithOptions(finalPath, arguments, workingDirectory);
-                if (python != null && python.StandardError.ReadToEnd().Length < 1)
+                string stdErr = (python != null) ? python.StandardError.ReadToEnd() : "";
+
+                if (python != null && stdErr.Length < 1)
                     return python;
-                if (Program.debug)
-                    Console.WriteLine("Failed to launch using `" + finalPath + "`, trying next");
+                if (Program.debug) {
+                    Console.WriteLine("Failed to launch using `" + finalPath + " " + arguments + "`, trying next");
+                    Console.WriteLine(stdErr);
+                }
             }
 
             throw new Exception("Cannot get Python running!");
