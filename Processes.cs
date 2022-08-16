@@ -26,27 +26,35 @@ namespace DoorDownloader {
         }
 
         public static Process StartPythonWithOptions(string arguments, string? workingDirectory = null) {
-            string pythonPath = "python3";
-            if (OperatingSystem.IsWindows())
-                pythonPath = "python3.exe";
+            List<string> pythons = new List<string> {
+                "python3",
+                "python",
+                "py",
+                AppContext.BaseDirectory + "python/" + "python"
+            };
 
             if (Processes.pythonOverridePath != null && Processes.pythonOverridePath.Length > 0) {
                 if (Program.debug)
                     Console.WriteLine("Using custom python: '" + Processes.pythonOverridePath + "'");
-                pythonPath = Processes.pythonOverridePath;
+                pythons.Clear();
+                pythons.Add(Processes.pythonOverridePath);
             }
 
-            Process python = StartProcessWithOptions(pythonPath, arguments, workingDirectory);
-            if (python == null || python.StandardError.ReadToEnd().Contains("not found")) {
-                pythonPath = AppContext.BaseDirectory + "python/" + "python";
+            Process python;
+
+            foreach(string pythonPath in pythons) {
+                string finalPath = pythonPath;
                 if (OperatingSystem.IsWindows())
-                    pythonPath = AppContext.BaseDirectory + "python\\" + "python.exe";
-                python = StartProcessWithOptions(pythonPath, arguments, workingDirectory);
+                    finalPath += ".exe";
+
+                python = StartProcessWithOptions(finalPath, arguments, workingDirectory);
+                if (python != null && python.StandardError.ReadToEnd().Length < 1)
+                    return python;
+                if (Program.debug)
+                    Console.WriteLine("Failed to launch using `" + finalPath + "`, trying next");
             }
-            if (python == null) {
-                throw new Exception("Cannot get Python running!");
-            }
-            return python;
+
+            throw new Exception("Cannot get Python running!");
         }
 
         public static string GetPyVersion() {
