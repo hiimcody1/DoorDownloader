@@ -6,7 +6,7 @@ using System.CommandLine;
 
 internal class Program {
 
-    public static string version = "v" + Assembly.GetExecutingAssembly().GetName().Version.Major + "." + Assembly.GetExecutingAssembly().GetName().Version.Minor + "." + Assembly.GetExecutingAssembly().GetName().Version.Build + "-alpha.2";
+    public static string version = "v" + Assembly.GetExecutingAssembly().GetName().Version.Major + "." + Assembly.GetExecutingAssembly().GetName().Version.Minor + "." + Assembly.GetExecutingAssembly().GetName().Version.Build + "-alpha.3";
     public static bool debug = false;
     static async Task Main(string[] args) {
         var forceUpdate = new Option<bool>(
