@@ -1,5 +1,6 @@
 ﻿using LibGit2Sharp;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DoorDownloader {
     internal class DoorRepo {
@@ -52,7 +53,7 @@ namespace DoorDownloader {
         }
 
         public string ToFriendlyString() {
-            return this.BaseRepoOwner + " - " + this.FriendlyName;
+            return this.BaseRepoOwner + " - " + this.FriendlyName + " [" + LastCommit() + "]";
         }
 
         public void Pull() {
@@ -84,6 +85,34 @@ namespace DoorDownloader {
                 //Silently fail
             }
             */
+        }
+
+        public DateTime? LastCommit() {
+            //Only supported via GitHub for now as our Git library doesn't support shallow cloning and a full clone is expensive
+            //Very easy to hit rate-limits using this, we probably need to re-evaluate how this is handled
+            if(BaseRepoUrl.Contains("github.com/")) {
+                try {
+                    JObject? latestCommitData = Web.FetchArbritraryJsonFromUrl(BaseRepoUrl.Replace("https://github.com/", "https://api.github.com/repos/") + "branches/" + BranchName);
+                    if (latestCommitData != null) {
+                        var commit = latestCommitData.Children();
+                        foreach(JToken tk in commit) {
+                            Console.WriteLine(tk.ToString());
+                        }
+                        Console.WriteLine(commit.ToString());
+                        /*
+                        JToken committer = commit.SelectToken("committer");
+                        JToken date = committer.SelectToken("date");
+                        Console.WriteLine(commit);
+                        Console.WriteLine(committer);
+                        Console.WriteLine(date);
+                        */
+                    }
+                } catch (Exception ex) {
+                    if(Program.debug)
+                        Console.WriteLine("Error while retrieving last commit date for branch: " + ex.ToString());
+                }
+            }
+            return null;
         }
     }
 }

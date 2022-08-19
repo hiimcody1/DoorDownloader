@@ -10,17 +10,37 @@ using System.Threading.Tasks;
 namespace DoorDownloader {
     internal class Web {
 
-        public static string CheckForUpdates() {
+        private static HttpClient prepareclient() {
             var httpClient = new HttpClient();
             var productInfo = new ProductInfoHeaderValue("DoorRandomizer-Downloader", Program.version);
             httpClient.DefaultRequestHeaders.UserAgent.Add(productInfo);
+            return httpClient;
+        }
+
+        public static JObject? FetchArbritraryJsonFromUrl(string url) {
+            var httpClient = prepareclient();
+            var resultAsync = httpClient.GetStringAsync(url);
+            resultAsync.Wait();
+            return JObject.Parse(resultAsync.Result);
+        }
+
+        public static string CheckForUpdates() {
+            var httpClient = prepareclient();
             var latestReleaseAsync = httpClient.GetStringAsync("https://api.github.com/repos/hiimcody1/DoorDownloader/releases/latest");
             latestReleaseAsync.Wait();
-            JObject latestReleaseJson = JObject.Parse(latestReleaseAsync.Result);
-            string latestRelease = latestReleaseJson.GetValue("tag_name").ToString();
-            if (Program.debug) {
-                Console.WriteLine("Latest Release: " + latestRelease);
-                Console.WriteLine("  This Release: " + Program.version);
+            string latestRelease = "<unknown>";
+            try {
+                JObject latestReleaseJson = JObject.Parse(latestReleaseAsync.Result);
+                latestRelease = latestReleaseJson.GetValue("tag_name").ToString();
+                if (Program.debug) {
+                    Console.WriteLine("Latest Release: " + latestRelease);
+                    Console.WriteLine("  This Release: " + Program.version);
+                }
+            } catch (Exception ex) {
+                if (Program.debug) {
+                    Console.WriteLine("Unable to check latest version:");
+                    Console.WriteLine(ex.ToString());
+                }
             }
             return latestRelease;
         }
@@ -29,7 +49,7 @@ namespace DoorDownloader {
         }
 
         public static void FetchPython() {
-            var httpClient = new HttpClient();
+            var httpClient = prepareclient();
             string pythonToDL;
             string installer;
             string installerArgs;
