@@ -60,7 +60,7 @@ internal class Program {
             //Arguments we need to pass to subclasses
             DoorRepo.forceUpdates = forceUpdateValue;
             Processes.pythonOverridePath = forcedPythonValue;
-            Program.debug = debugValue;
+            Program.debug = debugValue || System.Diagnostics.Debugger.IsAttached;
 
             //Get Python staged and ready to use before we pull a branch
             var PythonVersion = Processes.GetPyVersion();
@@ -177,7 +177,8 @@ internal class Program {
             }
 
             void setupDoorsDependencies(string directory) {
-                Process python = Processes.StartPythonWithOptions("-m pip install --disable-pip-version-check --user -r " + directory+"/resources/app/meta/manifests/pip_requirements.txt", directory);
+                string pipPath = "/resources/app/meta/manifests/pip_requirements.txt";
+                Process python = Processes.StartPythonWithOptions("-m pip install --disable-pip-version-check --user -r \"" + directory + pipPath.Replace("/", Path.DirectorySeparatorChar.ToString()) + "\"", directory);
                 if (Program.debug) {
                     Console.WriteLine(python.StandardOutput.ReadToEnd().Trim());
                     Console.WriteLine(python.StandardError.ReadToEnd().Trim());

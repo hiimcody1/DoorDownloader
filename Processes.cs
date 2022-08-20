@@ -32,7 +32,7 @@ namespace DoorDownloader {
                 "python3",
                 "python",
                 "py",
-                AppContext.BaseDirectory + "python/" + "python"
+                AppContext.BaseDirectory + "python" + Path.DirectorySeparatorChar + "python"
             };
 
             if (Processes.pythonOverridePath != null && Processes.pythonOverridePath.Length > 0) {
