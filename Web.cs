@@ -39,7 +39,7 @@ namespace DoorDownloader {
                 else
                     pythonToDL = "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.9.2-Windows-x86.exe";
                 installer = ".\\instPython.exe";
-                installerArgs = "/S /RegisterPython=0 /D=python";
+                installerArgs = "/S /RegisterPython=0 /D=" + AppContext.BaseDirectory + "python";   //Windows installer will accept spaces in its path, unlike the shell script for Mac/Linux
             } else if (System.OperatingSystem.IsMacOS()) {
                 //TODO We need to install brew for Mac since we need python-tk
                 /*

@@ -36,7 +36,8 @@ namespace DoorDownloader {
                 "python3",
                 "python",
                 "py",
-                Path.GetFullPath(AppContext.BaseDirectory + "python" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "python")
+                Path.GetFullPath(AppContext.BaseDirectory + "python" + Path.DirectorySeparatorChar + Path.DirectorySeparatorChar + "python"),   //Windows miniconda
+                Path.GetFullPath(AppContext.BaseDirectory + "python" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "python")    //Linux miniconda
             };
 
             if (Processes.pythonOverridePath != null && Processes.pythonOverridePath.Length > 0) {
