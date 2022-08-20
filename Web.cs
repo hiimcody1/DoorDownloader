@@ -38,8 +38,8 @@ namespace DoorDownloader {
                     pythonToDL = "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.9.2-Windows-x86_64.exe";
                 else
                     pythonToDL = "https://repo.anaconda.com/miniconda/Miniconda3-py38_4.9.2-Windows-x86.exe";
-                installer = "instPython.exe";
-                installerArgs = "/S /RegisterPython=0 /D=" + AppContext.BaseDirectory + "python";
+                installer = ".\\instPython.exe";
+                installerArgs = "/S /RegisterPython=0 /D=python";
             } else if (System.OperatingSystem.IsMacOS()) {
                 //TODO We need to install brew for Mac since we need python-tk
                 /*
@@ -53,8 +53,8 @@ namespace DoorDownloader {
                 throw new Exception("Unsupported platform! " + Environment.OSVersion);
             } else if (System.OperatingSystem.IsLinux()) {
                 pythonToDL = "https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh";
-                installer = "instPython.sh";
-                installerArgs = "-b -p " + AppContext.BaseDirectory + "python";
+                installer = "./instPython.sh";
+                installerArgs = "-b -p /tmp/ddpython";
             } else {
                 throw new Exception("Unsupported platform! " + Environment.OSVersion);
             }
@@ -69,14 +69,23 @@ namespace DoorDownloader {
 
             if (System.OperatingSystem.IsLinux() || System.OperatingSystem.IsMacOS()) {
                 //Chmod it on Linux/Mac
-                Process chmod = Processes.StartProcessWithOptions("bash", "-c \"chmod +x " + AppContext.BaseDirectory + installer + "\"");
+                Process chmod = Processes.StartProcessWithOptions("bash", "-c \"chmod +x \\\"" + AppContext.BaseDirectory + installer + "\\\"\"");
                 chmod.WaitForExit();
             }
 
-            Process process = Processes.StartProcessWithOptions(AppContext.BaseDirectory + installer, installerArgs);
+            Process process = Processes.StartProcessWithOptions(installer, installerArgs, AppContext.BaseDirectory);
             Console.WriteLine("Installing local python instance, if things freeze here longer than 2 minutes, something has gone wrong...");
             process.WaitForExit();
-            if (!File.Exists(AppContext.BaseDirectory + "python/DLLs/libcrypto-1_1-x64.dll")) {
+            try {
+                if (System.OperatingSystem.IsLinux() || System.OperatingSystem.IsMacOS()) {
+                    Process chmod = Processes.StartProcessWithOptions("bash", "-c \"mv /tmp/ddpython \\\"" + AppContext.BaseDirectory + "python\\\"\"");
+                    chmod.WaitForExit();
+                }
+            } catch (Exception ex) {
+                if(Program.debug)
+                    Console.WriteLine(ex.ToString());
+            }
+            if (!File.Exists(AppContext.BaseDirectory + "python/DLLs/libcrypto-1_1-x64.dll") && System.OperatingSystem.IsWindows()) {
                 //They need to be copied
                 File.Copy(AppContext.BaseDirectory + "python/Library/bin/libcrypto-1_1-x64.dll", AppContext.BaseDirectory + "python/DLLs/libcrypto-1_1-x64.dll");
                 File.Copy(AppContext.BaseDirectory + "python/Library/bin/libcrypto-1_1-x64.pdb", AppContext.BaseDirectory + "python/DLLs/libcrypto-1_1-x64.pdb");

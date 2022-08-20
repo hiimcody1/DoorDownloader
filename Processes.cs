@@ -16,6 +16,10 @@ namespace DoorDownloader {
             processStartInfo.RedirectStandardOutput = true;
             processStartInfo.RedirectStandardError = true;
             processStartInfo.CreateNoWindow = true;
+
+            if (Program.debug)
+                Console.WriteLine(processStartInfo.FileName+" "+processStartInfo.Arguments);
+
             Process? process;
             try {
                 process = Process.Start(processStartInfo);
@@ -32,7 +36,7 @@ namespace DoorDownloader {
                 "python3",
                 "python",
                 "py",
-                AppContext.BaseDirectory + "python/" + "python"
+                Path.GetFullPath(AppContext.BaseDirectory + "python" + Path.DirectorySeparatorChar + "bin" + Path.DirectorySeparatorChar + "python")
             };
 
             if (Processes.pythonOverridePath != null && Processes.pythonOverridePath.Length > 0) {
