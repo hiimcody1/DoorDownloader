@@ -7,3 +7,5 @@
 /bin
 /Properties/PublishProfiles
 *.user
+/DoorDownloaderGUI/bin
+/DoorDownloaderGUI/obj

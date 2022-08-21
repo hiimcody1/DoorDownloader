@@ -18,6 +18,7 @@ This project utilizes the following projects, which I recommend you check out:
 - [Miniconda](https://github.com/conda/conda)
 - [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json)
 - [command-line-api](https://github.com/dotnet/command-line-api)
+- [Eto.Forms](https://github.com/picoe/Eto)
 
 ## Setup
 ### Prerequisites
