@@ -35,5 +35,17 @@
         "ManualUpdateOnly": true
       }
     ]
+  },
+  {
+    "Owner": "Muffins",
+    "BaseUrl": "https://github.com/KrisDavie/DoorTracker",
+    "Branches": [
+      {
+        "BranchName": "main",
+        "FriendlyName": "DoorTracker",
+        "ManualUpdateOnly": true,
+        "Tracker": true
+      }
+    ]
   }
 ]

@@ -1,5 +1,7 @@
 ﻿using LibGit2Sharp;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace DoorDownloader {
     internal class DoorRepo {
@@ -8,6 +10,8 @@ namespace DoorDownloader {
         public List<DoorRepoBranch> Branches { get; set; }
 
         public static bool forceUpdates = false;
+
+        public static bool isTracker = false;
 
         public DoorRepo(string owner, string baseUrl) {
             Owner = owner;
@@ -32,20 +36,28 @@ namespace DoorDownloader {
         public string BaseRepoOwner = "";
         public string BranchName { get; set; }
         public string FriendlyName { get; set; }
-        public string BasePath;
+        public string BasePath = "";
 
         public bool ManualUpdateOnly = false;
+        public bool Tracker = false;
         [JsonConstructor]
         public DoorRepoBranch(string branchName, string friendlyName) {
             BranchName = branchName;
             FriendlyName = friendlyName;
-            BasePath = AppContext.BaseDirectory + branchName;
+            this.RefreshPath();
         }
         public DoorRepoBranch(string branchName, string friendlyName, bool manualUpdateOnly) {
             BranchName = branchName;
             FriendlyName = friendlyName;
-            BasePath = AppContext.BaseDirectory + branchName;
             ManualUpdateOnly = true;
+            this.RefreshPath();
+        }
+        public DoorRepoBranch(string branchName, string friendlyName, bool manualUpdateOnly, bool isTracker) {
+            BranchName = branchName;
+            FriendlyName = friendlyName;
+            ManualUpdateOnly = true;
+            Tracker = isTracker;
+            this.RefreshPath();
         }
         public override string ToString() {
             return this.BaseRepoUrl + this.BranchName;
@@ -53,6 +65,10 @@ namespace DoorDownloader {
 
         public string ToFriendlyString() {
             return this.BaseRepoOwner + " - " + this.FriendlyName;
+        }
+
+        public void RefreshPath() {
+            this.BasePath = AppContext.BaseDirectory + Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(BaseRepoUrl.ToCharArray())))[..10] + "-" + this.BranchName;
         }
 
         public void Pull() {

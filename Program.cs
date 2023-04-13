@@ -3,6 +3,9 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using System.Reflection;
 using System.CommandLine;
+using System.Security.Cryptography;
+using System.Buffers.Text;
+using System.Text;
 
 internal class Program {
 
@@ -46,15 +49,16 @@ internal class Program {
             name: "--debug",
             description: "Enable debug output (Use this for reporting errors)"
         );
-        var rootCommand = new RootCommand("Download and launch a branch of the ALttP Door Randomizer");
-        rootCommand.Add(forceUpdate);
-        rootCommand.Add(forcedRepository);
-        rootCommand.Add(forcedBranch);
-        rootCommand.Add(forcedPython);
-        rootCommand.Add(outputPath);
-        rootCommand.Add(romPath);
-        rootCommand.Add(createShortcut);
-        rootCommand.Add(debug);
+        var rootCommand = new RootCommand("Download and launch a branch of the ALttP Door Randomizer") {
+            forceUpdate,
+            forcedRepository,
+            forcedBranch,
+            forcedPython,
+            outputPath,
+            romPath,
+            createShortcut,
+            debug
+        };
 
         rootCommand.SetHandler((forceUpdateValue, forcedRepositoryValue, forcedBranchValue, forcedPythonValue, outputPathValue, romPathValue, createShortcutValue, debugValue) => {
             //Arguments we need to pass to subclasses
@@ -93,9 +97,12 @@ internal class Program {
                 Console.WriteLine("Auto launching a branch...");
                 DoorRepoBranch forcedBranch = new DoorRepoBranch(forcedBranchValue, forcedBranchValue);
                 forcedBranch.BaseRepoUrl = forcedRepositoryValue;
+                forcedBranch.RefreshPath();
+                if (outputPathValue == "tracker")
+                    forcedBranch.Tracker = true;
                 if (DoorRepo.forceUpdates)
                     forcedBranch.Pull();
-                launchDoorsGui(forcedBranch.BasePath);
+                launchBranch(forcedBranch);
                 return;
             }
 
@@ -121,6 +128,7 @@ internal class Program {
                 doorRepo.Branches.ForEach(delegate (DoorRepoBranch branch) {
                     branch.BaseRepoOwner = doorRepo.Owner;
                     branch.BaseRepoUrl = doorRepo.BaseUrl;
+                    branch.RefreshPath();
                     BranchList.Add(branch);
                 });
             }
@@ -149,20 +157,34 @@ internal class Program {
             RepositoryChoice.Pull();
 
             Console.WriteLine("Checking/Resolving dependencies for the gui...");
-            setupDoorsDependencies(RepositoryChoice.BasePath);
+            setupBranch(RepositoryChoice);
 
             var wantsShortcut = fetchChoice("Do you want to create a shortcut to quickly launch this branch in the future? Enter Y or N. (Default: N)");
             if (wantsShortcut != null && wantsShortcut.ToLower().StartsWith("y"))
                 createShortcutValue = true;
 
-            if(createShortcutValue) {
+            if (createShortcutValue) {
                 createShortcutForBranch(RepositoryChoice);
             } else {
                 Console.WriteLine("Launching the GUI for your selected branch. If nothing happens, re-run with --debug and there may be an error listed below you can report!");
-                launchDoorsGui(RepositoryChoice.BasePath);
+                launchBranch(RepositoryChoice);
             }
 
             //Methods
+            void launchBranch(DoorRepoBranch branch) {
+                if (branch.Tracker)
+                    launchTrackerGui(branch.BasePath);
+                else
+                    launchDoorsGui(branch.BasePath);
+            }
+
+            void setupBranch(DoorRepoBranch branch) {
+                if (branch.Tracker)
+                    setupTrackerDependencies(branch.BasePath);
+                else
+                    setupDoorsDependencies(branch.BasePath);
+            }
+
             void launchDoorsGui(string directory) {
                 string rom = "";
                 
@@ -186,14 +208,34 @@ internal class Program {
                 python.WaitForExit();
             }
 
+            void launchTrackerGui(string directory) {
+                Process tracker = Processes.StartPythonWithOptions("./DoorsTracker.py", directory);
+                if (Program.debug) {
+                    Console.WriteLine(tracker.StandardOutput.ReadToEnd());
+                    Console.WriteLine(tracker.StandardError.ReadToEnd());
+                }
+            }
+
+            void setupTrackerDependencies(string directory) {
+                Process python = Processes.StartPythonWithOptions("-m pip install --disable-pip-version-check --user grpcio grpcio-tools pyyaml pillow tk");
+                if (Program.debug) {
+                    Console.WriteLine(python.StandardOutput.ReadToEnd().Trim());
+                    Console.WriteLine(python.StandardError.ReadToEnd().Trim());
+                }
+                python.WaitForExit();
+            }
+
             void createShortcutForBranch(DoorRepoBranch branch) {
                 string additionalArgs = "";
 
                 if (romPathValue.ToString() != AppContext.BaseDirectory)
                     additionalArgs = " --rom \"" + romPathValue + "\"";
 
-                if (DoorRepo.forceUpdates)
+                if (!branch.ManualUpdateOnly)
                     additionalArgs += " --alwaysupdaterepo";
+
+                if (branch.Tracker)
+                    outputPathValue = "tracker";
 
                 StreamWriter shortcut;
                 if (System.OperatingSystem.IsWindows()) {
