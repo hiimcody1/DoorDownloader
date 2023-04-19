@@ -209,10 +209,12 @@ internal class Program {
             }
 
             void launchTrackerGui(string directory) {
-                Process tracker = Processes.StartPythonWithOptions("./DoorsTracker.py", directory);
                 if (Program.debug) {
+                    Process tracker = Processes.StartPythonWithOptions("./DoorsTracker.py --debug", directory);
                     Console.WriteLine(tracker.StandardOutput.ReadToEnd());
                     Console.WriteLine(tracker.StandardError.ReadToEnd());
+                } else {
+                    Process tracker = Processes.StartPythonWithOptions("./DoorsTracker.py", directory);
                 }
             }
 
